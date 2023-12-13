@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login/Register DApp</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.0/dist/web3.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div>
+        <h1>Login/Register DApp</h1>
+    </div>
+
+    <div id="loginSection">
+        <h2>Login</h2>
+        <label for="loginUsername">Username:</label>
+        <input type="text" id="loginUsername" placeholder="Enter your username">
+        <label for="walletAddress">Wallet Address:</label>
+        <input type="text" id="walletAddress" placeholder="Enter your Ethereum wallet address">
+        <button onclick="login()">Login</button>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Connect to the Ethereum network using web3.js
+        if (window.ethereum) {
+            window.web3 = new Web3(window.ethereum);
+            await window.ethereum.enable();
+        } else {
+            console.error("Web3 not found. Please use a web3-enabled browser like MetaMask.");
+        }
+    });
+
+    async function login() {
+        const username = document.getElementById("loginUsername").value;
+        const walletAddress = document.getElementById("walletAddress").value;
+
+        // Validate Ethereum address format
+        if (!web3.utils.isAddress(walletAddress)) {
+            alert("Invalid Ethereum wallet address");
+            return;
+        }
+
+        // Get the deployed contract instance
+        const contractAddress = "0xd9145CCE52D386f254917e481eB44e9943F39138";
+        const contractAbi = [[
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "_newOwner",
+                    "type": "address"
+                }
+            ],
+            "name": "changeOwner",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "_username",
+                    "type": "string"
+                },
+                {
+                    "internalType": "address",
+                    "name": "_walletAddress",
+                    "type": "address"
+                }
+            ],
+            "name": "login",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "stateMutability": "nonpayable",
+            "type": "constructor"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "user",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "string",
+                    "name": "username",
+                    "type": "string"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "walletAddress",
+                    "type": "address"
+                }
+            ],
+            "name": "UserLoggedIn",
+            "type": "event"
+        },
+        {
+            "inputs": [],
+            "name": "getUser",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                },
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "name": "loggedIn",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "owner",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "name": "users",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }
+    ]]; // Replace with your contract ABI
+        const contract = new web3.eth.Contract(contractAbi, contractAddress);
+
+        if (window.ethereum && window.ethereum.isConnected()) {
+            try {
+                // Get the list of accounts from MetaMask
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const userAddress = accounts[0];
+    
+                // Get the deployed contract instance
+                const contract = new web3.eth.Contract(contractAbi, contractAddress);
+    
+                // Call the getUser function on the smart contract
+                const result = await contract.methods.getUser().call({ from: userAddress });
+    
+                // Display the username
+                const username = result[0];
+                alert(`Hello, ${username}!`);
+            } catch (error) {
+                console.error("Error getting user information:", error);
+                alert(`Failed to retrieve user information. Error: ${error.message}`);
+            }
+        } else {
+            alert("MetaMask is not installed or not connected.");
+        }
+    }
+</script>
+
+</body>
+</html>
